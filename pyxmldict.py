@@ -33,7 +33,9 @@ For example, if array's name is 'values', then children's tag will be 'value'.
 import types
 
 
-def _val2xml(val):
+__VERSION__ = '1.0'
+
+def __val2xml__(val):
     '''
     Convert a Python value to XML element 
     '''
@@ -43,29 +45,29 @@ def _val2xml(val):
         return '<![CDATA[%s]]>'%str(val)
 
 
-INDENT = ' '  # Indentation for each XNL line, no indentation when empty.
-NEWLINE = '\n'  # New line char, no new line when empty
-VAL2XML = _val2xml  # Python value to XML element, if unnecessary set it with str function: VAL2XML = str
+__INDENT__ = ' '  # Indentation for each XNL line, no indentation when empty.
+__NEWLINE__ = '\n'  # New line char, no new line when empty
+__VAL2XML__ = __val2xml__  # Python value to XML element, if unnecessary set it with str function: __VAL2XML__ = str
 
 
 
-def _obj2xml(tag, obj, pres='', newline=NEWLINE):
+def __obj2xml__(tag, obj, pres='', newline=__NEWLINE__):
     '''
     convert object to XML
     '''
     tp = type(obj)
     if tp is types.DictType:
-        return '%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([_obj2xml(k, v, pres + INDENT, newline) for k, v in obj.items()]), newline, pres, tag)
+        return '%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([__obj2xml__(k, v, pres + __INDENT__, newline) for k, v in obj.items()]), newline, pres, tag)
     elif tp is types.TupleType or tp is types.ListType:
-        return '%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([_obj2xml(tag[:-1], o, pres + INDENT, newline) for o in obj]), newline, pres, tag)
+        return '%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([__obj2xml__(tag[:-1], o, pres + __INDENT__, newline) for o in obj]), newline, pres, tag)
     else:
-        return '%s<%s>%s</%s>' % (pres, tag, VAL2XML(obj), tag)
+        return '%s<%s>%s</%s>' % (pres, tag, __VAL2XML__(obj), tag)
 
 def dict2xml(obj):
     '''
     convert dictionary to XML
     '''
-    return _obj2xml('xml', obj)
+    return __obj2xml__('xml', obj)
 
 
 def test():
