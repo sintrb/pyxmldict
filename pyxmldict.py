@@ -33,7 +33,7 @@ For example, if array's name is 'values', then children's tag will be 'value'.
 import types
 
 
-__VERSION__ = '1.0'
+__version__ = '1.0'
 
 def __val2xml__(val):
     '''
