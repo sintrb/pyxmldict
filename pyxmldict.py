@@ -31,7 +31,7 @@ For example, if array's name is 'values', then children's tag will be 'value'.
 '''
 
 import types
-
+from xml.dom import minidom, Node
 
 __version__ = '1.0'
 
@@ -42,7 +42,7 @@ def __val2xml__(val):
     if type(val) is types.IntType or type(val) is types.FloatType:
         return val
     else:
-        return '<![CDATA[%s]]>'%str(val)
+        return u'<![CDATA[%s]]>' % val
 
 
 __INDENT__ = ' '  # Indentation for each XNL line, no indentation when empty.
@@ -57,11 +57,11 @@ def __obj2xml__(tag, obj, pres='', newline=__NEWLINE__):
     '''
     tp = type(obj)
     if tp is types.DictType:
-        return '%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([__obj2xml__(k, v, pres + __INDENT__, newline) for k, v in obj.items()]), newline, pres, tag)
+        return u'%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([__obj2xml__(k, v, pres + __INDENT__, newline) for k, v in obj.items()]), newline, pres, tag)
     elif tp is types.TupleType or tp is types.ListType:
-        return '%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([__obj2xml__(tag[:-1], o, pres + __INDENT__, newline) for o in obj]), newline, pres, tag)
+        return u'%s<%s>%s%s%s%s</%s>' % (pres, tag, newline, newline.join([__obj2xml__(tag[:-1], o, pres + __INDENT__, newline) for o in obj]), newline, pres, tag)
     else:
-        return '%s<%s>%s</%s>' % (pres, tag, __VAL2XML__(obj), tag)
+        return u'%s<%s>%s</%s>' % (pres, tag, __VAL2XML__(obj), tag)
 
 def dict2xml(obj):
     '''
@@ -69,15 +69,29 @@ def dict2xml(obj):
     '''
     return __obj2xml__('xml', obj)
 
+def __xml2dict__(parent):
+    d = {}
+    for node in parent.childNodes:
+        if not isinstance(node, minidom.Element):
+            continue
+        if not node.hasChildNodes():
+            continue
+        if len(node.childNodes) == 1 and node.childNodes[0].nodeType in [minidom.Node.CDATA_SECTION_NODE, minidom.Node.TEXT_NODE]:
+            d[node.tagName] = node.childNodes[0].data
+        elif node.hasChildNodes():
+            d[node.tagName] = __xml2dict__(node)
+    return d
+
+def xml2dict(xmls):
+    doc = minidom.parseString(xmls)
+    return __xml2dict__(doc.childNodes[0])
 
 def test():
     '''
     test case
     '''
-    
-    # test dictionary to XML
-    print dict2xml(
-    {
+    import json
+    d = {
     'a':'aa',
     'b':'bb',
     'c':{
@@ -100,11 +114,16 @@ def test():
                     'h':'H'}}}},
      'name':'trb'
     }
-    )
+    
+    # test dictionary to XML
+    xmls = dict2xml(d)
+    d2 = xml2dict(xmls)
+    print xmls
+    print json.dumps(d)
+    print json.dumps(d2)
 
 if __name__ == '__main__':
     test()
     
-
 
 
